@@ -1,0 +1,50 @@
+# Build artifacts
+*.zip
+*.tar.gz
+*.tar
+deepseek-ocr-*.zip
+deepseek-ocr-*.tar.gz
+
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+
+# Jupyter
+.ipynb_checkpoints/
+*.ipynb_checkpoints
+
+# IDEs
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Logs
+*.log
+
+# Temporary files
+*.tmp
+*.bak
+.~*
+
+# Model cache (large files)
+*.safetensors
+*.bin
+*.pt
+*.pth
+models/
+checkpoints/
+
+# Environment
+.env
+.env.local
+venv/
+env/

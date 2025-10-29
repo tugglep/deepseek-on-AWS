@@ -1,0 +1,38 @@
+version: 0.2
+
+# AWS CodeBuild buildspec for DeepSeek OCR SageMaker BYOC
+# This builds and pushes the Docker container to Amazon ECR
+
+phases:
+  pre_build:
+    commands:
+      - echo "Logging in to Amazon ECR..."
+      - AWS_ACCOUNT_ID=$(aws sts get-caller-identity --query Account --output text)
+      - AWS_REGION=${AWS_DEFAULT_REGION:-us-west-2}
+      - REPOSITORY_NAME=deepseek-ocr-sagemaker-byoc
+      - IMAGE_TAG=latest
+      - IMAGE_URI=$AWS_ACCOUNT_ID.dkr.ecr.$AWS_REGION.amazonaws.com/$REPOSITORY_NAME:$IMAGE_TAG
+      - echo "Image URI will be $IMAGE_URI"
+      - aws ecr get-login-password --region $AWS_REGION | docker login --username AWS --password-stdin $AWS_ACCOUNT_ID.dkr.ecr.$AWS_REGION.amazonaws.com
+      - echo "Creating ECR repository if it doesn't exist..."
+      - aws ecr describe-repositories --repository-names $REPOSITORY_NAME --region $AWS_REGION 2>/dev/null || aws ecr create-repository --repository-name $REPOSITORY_NAME --region $AWS_REGION
+
+  build:
+    commands:
+      - echo "Build started on $(date)"
+      - echo "Building Docker image..."
+      - docker build -t $REPOSITORY_NAME:$IMAGE_TAG -f container/Dockerfile .
+      - docker tag $REPOSITORY_NAME:$IMAGE_TAG $IMAGE_URI
+      - echo "Build completed on $(date)"
+
+  post_build:
+    commands:
+      - echo "Pushing Docker image to ECR..."
+      - docker push $IMAGE_URI
+      - echo "Push completed on $(date)"
+      - echo "Image URI - $IMAGE_URI"
+      - printf '{"ImageURI":"%s"}' $IMAGE_URI > imageDetail.json
+
+artifacts:
+  files:
+    - imageDetail.json

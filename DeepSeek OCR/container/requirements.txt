@@ -1,0 +1,49 @@
+# DeepSeek OCR Dependencies
+#
+# NOTE: All dependencies are installed in the Dockerfile
+# This file documents what's installed for reference
+#
+# Installation is done in Dockerfile to:
+# - Control build order (PyTorch before flash-attn)
+# - Use specific package sources (PyTorch from pytorch.org index)
+# - Compile flash-attn with proper build flags
+# - Pin exact versions for reproducibility
+
+## Deep Learning Framework
+torch==2.5.1              # PyTorch with CUDA 12.1 support
+torchvision==0.20.1       # Vision utilities (installed with torch)
+
+## Model Backend
+transformers==4.46.3      # HuggingFace Transformers (official DeepSeek-OCR backend)
+tokenizers==0.20.3        # Fast tokenizers
+accelerate                # Training/inference acceleration utilities
+
+## Model-Specific Requirements
+flash-attn==2.7.3         # Flash Attention 2 (required for DeepSeek-OCR performance)
+einops                    # Tensor operations
+addict                    # Dict utilities
+easydict                  # Dict utilities
+
+## Build Tools (for flash-attn compilation)
+ninja                     # Build system
+psutil                    # Process utilities
+packaging                 # Version parsing
+
+## Web Framework
+fastapi==0.115.5          # API framework
+uvicorn[standard]==0.32.1 # ASGI server
+pydantic==2.10.3          # Data validation
+
+## Image/PDF Processing
+Pillow==11.0.0            # Image manipulation
+pypdfium2==4.30.0         # PDF rendering
+
+## AWS Integration
+boto3==1.35.91            # AWS SDK
+requests==2.32.3          # HTTP client
+
+## Model Download Optimization
+hf-transfer               # Fast HuggingFace model downloads
+
+# Total approximate size: ~8GB (includes PyTorch, model weights)
+# Build time: ~15-20 minutes (mostly flash-attn compilation)
