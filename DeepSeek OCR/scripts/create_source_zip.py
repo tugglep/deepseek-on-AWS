@@ -30,7 +30,7 @@ def create_zip(source_dir, output_file, exclude_patterns):
                 if file == "buildspec.yml":
                     continue
 
-                arcname = file_path.relative_to(source_path.parent)
+                arcname = file_path.relative_to(source_path)
                 print(f"Adding: {arcname}")
                 zipf.write(file_path, arcname)
 
