@@ -5,6 +5,13 @@
 
 set -e
 
+# Get the directory where this script is located
+SCRIPT_DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
+# Get the DeepSeek OCR project root (parent of scripts/)
+PROJECT_DIR="$( cd "${SCRIPT_DIR}/.." && pwd )"
+# Get the repo root (parent of "DeepSeek OCR/")
+REPO_ROOT="$( cd "${PROJECT_DIR}/.." && pwd )"
+
 AWS_REGION=${AWS_DEFAULT_REGION:-us-west-2}
 AWS_ACCOUNT_ID=$(aws sts get-caller-identity --query Account --output text)
 PROJECT_NAME="deepseek-ocr-byoc-build"
@@ -25,11 +32,12 @@ aws s3 ls s3://${S3_BUCKET} >/dev/null 2>&1 || aws s3 mb s3://${S3_BUCKET} --reg
 
 # Step 2: Zip source code
 echo "📁 Creating source archive..."
-python3 "DeepSeek OCR/scripts/create_source_zip.py"
+cd "${PROJECT_DIR}"
+python3 scripts/create_source_zip.py
 
 # Step 3: Upload to S3
 echo "⬆️  Uploading to S3..."
-aws s3 cp ${SOURCE_ZIP} s3://${S3_BUCKET}/codebuild/${SOURCE_ZIP}
+aws s3 cp "${SOURCE_ZIP}" s3://${S3_BUCKET}/codebuild/${SOURCE_ZIP}
 
 # Step 4: Create or update CodeBuild project
 echo "🏗️  Setting up CodeBuild project..."
@@ -97,4 +105,5 @@ else
 fi
 
 # Cleanup
-rm -f ${SOURCE_ZIP}
+cd "${REPO_ROOT}"
+rm -f "${SOURCE_ZIP}"

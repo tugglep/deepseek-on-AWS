@@ -6,8 +6,12 @@ import zipfile
 from pathlib import Path
 
 def create_zip(source_dir, output_file, exclude_patterns):
-    """Create zip file from source directory"""
-    source_path = Path(source_dir)
+    """Create zip file from source directory
+
+    Files are added at the root level of the zip (not inside a subfolder).
+    For example: container/Dockerfile, scripts/build.sh, etc.
+    """
+    source_path = Path(source_dir).resolve()
 
     with zipfile.ZipFile(output_file, 'w', zipfile.ZIP_DEFLATED) as zipf:
         # First, add buildspec.yml at the root if it exists
@@ -30,12 +34,22 @@ def create_zip(source_dir, output_file, exclude_patterns):
                 if file == "buildspec.yml":
                     continue
 
-                arcname = file_path.relative_to(source_path.parent)
+                # Use source_path as base (not source_path.parent) to exclude parent folder name
+                arcname = file_path.relative_to(source_path)
                 print(f"Adding: {arcname}")
                 zipf.write(file_path, arcname)
 
     print(f"\n✅ Created {output_file} ({os.path.getsize(output_file) / 1024 / 1024:.2f} MB)")
 
 if __name__ == "__main__":
-    exclude = ['.ipynb_checkpoints', '__pycache__', '.git', '.DS_Store']
-    create_zip("DeepSeek OCR", "deepseek-ocr-source.zip", exclude)
+    # Run from the project directory (where this script is located)
+    script_dir = Path(__file__).parent.resolve()
+    project_dir = script_dir.parent
+
+    exclude = ['.ipynb_checkpoints', '__pycache__', '.git', '.DS_Store', '.zip']
+
+    # Change to project directory to create zip there
+    os.chdir(project_dir)
+
+    # Use current directory as source (we're already in "DeepSeek OCR/")
+    create_zip(".", "deepseek-ocr-source.zip", exclude)
