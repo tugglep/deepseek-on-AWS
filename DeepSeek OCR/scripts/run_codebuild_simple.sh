@@ -5,6 +5,14 @@
 
 set -e
 
+# Get the directory where this script is located
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+# Navigate to repo root (2 levels up from scripts/)
+REPO_ROOT="$(cd "${SCRIPT_DIR}/../.." && pwd)"
+
+# Change to repo root for all operations
+cd "${REPO_ROOT}"
+
 AWS_REGION=${AWS_DEFAULT_REGION:-us-west-2}
 AWS_ACCOUNT_ID=$(aws sts get-caller-identity --query Account --output text)
 PROJECT_NAME="deepseek-ocr-byoc-build"
@@ -18,6 +26,7 @@ ROLE_ARN="arn:aws:iam::${AWS_ACCOUNT_ID}:role/service-role/${ROLE_NAME}"
 echo "🏗️  Running AWS CodeBuild for DeepSeek OCR"
 echo "Region: ${AWS_REGION}"
 echo "Project: ${PROJECT_NAME}"
+echo "Working from: ${REPO_ROOT}"
 
 # Step 1: Create/verify S3 bucket
 echo "📦 Checking S3 bucket..."
